@@ -1,19 +1,14 @@
-"""
-Data Processing Pipeline - CLI Template
-
-DS 3500 - MP1
-
-Usage:
-    python pipeline.py --input data.csv --output clean.csv
-    python pipeline.py --input data.csv --output results.json --format json --verbose
-"""
-
-import argparse
-import logging
-import sys
+# data_loaders.py
 from pathlib import Path
 
+import logging
+import pandas as pd
+import json
+import yaml
 
+
+# Do not call logging.basicConfig() here.
+# Use the logging configuration from Part 1.
 logger = logging.getLogger(__name__)
 
 
@@ -74,16 +69,40 @@ def validate_input(filepath):
         return False
 
 
-def main():
-    """Main pipeline function."""
-    args = parse_arguments()
-    setup_logging(verbose=args.verbose)
-    validate_input(args.input)
-    logger.debug(f"Arguments parsed: input={args.input}, output={args.output}, format={args.format}")
-
-    if not validate_input(args.input):
-        sys.exit(1)
+def load_csv(filepath):
+    """Load a CSV file into a DataFrame."""
+    df = pd.read_csv(filepath)
+    logger.info(f"Loaded CSV file: {filepath} ({len(df)} rows)")
+    return df
 
 
-if __name__ == "__main__":
-    main()
+def load_json(filepath):
+    """Load a JSON file into a Python object (dict or list)."""
+    with open(filepath, "r") as file:
+        data = json.load(file)
+        logger.info(f"Loaded JSON file: {filepath}")
+        return data
+
+
+def load_yaml(filepath):
+    """Load a YAML file into a Python object."""
+    with open(filepath, "r") as file:
+        config = yaml.safe_load(file)
+        logger.info(f"Loaded YAML file: {filepath}")
+
+
+
+def load_data(filepath):
+    """Load a file based on its extension."""
+    data = Path(filepath)
+    if data.suffix == ".csv":
+        return load_csv(data)
+    elif data.suffix == ".json":
+        return load_json(data)
+    elif data.suffix == ".yaml":
+        return load_yaml(data)
+    else:
+        logger.error(f"Unsupported file format: {data.suffix}")
+        raise ValueError("Unsupported file format.")
+
+
