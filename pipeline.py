@@ -40,7 +40,6 @@ def parse_arguments():
     parser.add_argument(
         "--output",
         "-o",
-        required=True,
         help="path to output file"
     )
 
@@ -85,7 +84,7 @@ def main():
         sys.exit(1)
 
     try:
-        data = data_loaders.load_data()
+        data = data_loaders.load_data(args.input)
         return data
     except ValueError as e:
         logger.error(f"Failed to load data: {e}")
