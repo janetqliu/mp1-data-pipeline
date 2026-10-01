@@ -13,6 +13,7 @@ import logging
 import sys
 from pathlib import Path
 import data_loaders
+from data_processor import process_data, create_cleaning_report
 
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ def setup_logging(verbose=False):
     """Configure logging for the pipeline."""
     logging.basicConfig(
     level=logging.DEBUG if verbose else logging.INFO,
-    format="%(asctime)s %(levelname)-8s %(message)s",
+    format="%(asctime)s %(levelname)-8s %(name)s — %(message)s"
     datefmt="%H:%M:%S"
     )
 
@@ -38,17 +39,24 @@ def parse_arguments():
     )
 
     parser.add_argument(
+        "--config",
+        "-c",
+        required=True,
+        help="path to yaml config file"
+    )
+
+    parser.add_argument(
         "--output",
         "-o",
         help="path to output file"
     )
 
-    parser.add_argument(
-        "--format",
-        default="csv",
-        choices=["csv", "json"],
-        help="output format (csv or json, default csv)" 
-    )
+    # parser.add_argument(
+    #     "--format",
+    #     default="csv",
+    #     choices=["csv", "json"],
+    #     help="output format (csv or json, default csv)" 
+    # )
 
     parser.add_argument(
         "--verbose",
@@ -76,21 +84,37 @@ def validate_input(filepath):
 def main():
     """Main pipeline function."""
     args = parse_arguments()
+
     setup_logging(verbose=args.verbose)
 
-    logger.debug(f"Arguments parsed: input={args.input}, output={args.output}, format={args.format}")
+    logger.debug(f"Arguments parsed: input={args.input}, config={args.config}, output={args.output}, format={args.format}")
 
     if not validate_input(args.input):
         sys.exit(1)
 
-    try:
-        data = data_loaders.load_data(args.input)
-        return data
-    except ValueError as e:
-        logger.error(f"Failed to load data: {e}")
+    if not validate_input(args.config):
         sys.exit(1)
 
+    try:
+        data = data_loaders.load_data(args.input)
+        config = data_loaders.load_data(args.config)
+        return data, config
+    except ValueError as e:
+        logger.error(f"Failed to load data/config: {e}")
+        sys.exit(1)
 
+    df_before = data
+
+    try:
+        df_after = process_data(data, config)
+    except ValueError as e:
+        sys.exit(1)
+
+    report = create_cleaning_report(df_before, df_after)
+    logger.info(f"Processing successful")
+
+    df.to_csv(args.output, index=False)
+    logger.info("Saved to CSV successfully")
 
 if __name__ == "__main__":
     main()
