@@ -22,7 +22,7 @@ def setup_logging(verbose=False):
     """Configure logging for the pipeline."""
     logging.basicConfig(
     level=logging.DEBUG if verbose else logging.INFO,
-    format="%(asctime)s %(levelname)-8s %(name)s — %(message)s"
+    format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
     datefmt="%H:%M:%S"
     )
 
@@ -48,6 +48,7 @@ def parse_arguments():
     parser.add_argument(
         "--output",
         "-o",
+        required=True,
         help="path to output file"
     )
 
@@ -87,7 +88,7 @@ def main():
 
     setup_logging(verbose=args.verbose)
 
-    logger.debug(f"Arguments parsed: input={args.input}, config={args.config}, output={args.output}, format={args.format}")
+    logger.debug(f"Arguments parsed: input={args.input}, config={args.config}, output={args.output}")
 
     if not validate_input(args.input):
         sys.exit(1)
@@ -98,12 +99,12 @@ def main():
     try:
         data = data_loaders.load_data(args.input)
         config = data_loaders.load_data(args.config)
-        return data, config
+        
     except ValueError as e:
         logger.error(f"Failed to load data/config: {e}")
         sys.exit(1)
 
-    df_before = data
+    df_before = data.copy()
 
     try:
         df_after = process_data(data, config)
@@ -111,10 +112,10 @@ def main():
         sys.exit(1)
 
     report = create_cleaning_report(df_before, df_after)
-    logger.info(f"Processing successful")
+    logger.info(f"Processing successful, cleaning report: {report}")
 
-    df.to_csv(args.output, index=False)
-    logger.info("Saved to CSV successfully")
+    df_after.to_csv(args.output, index=False)
+    logger.info(f"Saved data successfully to {args.output}")
 
 if __name__ == "__main__":
     main()

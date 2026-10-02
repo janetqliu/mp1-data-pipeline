@@ -32,7 +32,7 @@ def handle_missing(df, axis="rows"):
         return df
 
     else: 
-        logger.error(f"Usupported axis: {axis}")
+        logger.error(f"Unsupported axis: {axis}")
         raise ValueError(f"Axis must be rows or columns; {axis} invalid")
 
 
@@ -53,20 +53,29 @@ def remove_outliers(df, columns, method, threshold):
             logger.warning(f"Column {col} is not numeric; skipping")
             continue
 
-    if method == "iqr":
-        [ FILL IN LATER ]
-    elif method == "zcore":
-        [ FILL IN LATER ]
+        if method == "iqr":
+            q1 = df[col].quantile(0.25)
+            q3 = df[col].quantile(0.75)
+            iqr = q3 - q1
+            lower = q1 - threshold * iqr
+            upper = q3 + threshold * iqr
+            df = df[(df[col] <= upper) & (df[col] >= lower)]
+        elif method == "zscore":
+            mean = df[col].mean()
+            std = df[col].std()
+            z_scores = (df[col] - mean) / std
+            df = df[z_scores.abs() <= threshold]
 
     after = len(df)
 
     logger.debug(f"{before - after} rows removed via {method} with {threshold} threshold")
+    
     return df
 
 
 def process_data(df, config):
     """Apply the processing steps enabled in the configuration."""
-    conf = yaml.safe_load(config)["processing"]
+    conf = config["processing"]
 
     if conf["remove_duplicates"] == True:
         df = remove_duplicates(df)
