@@ -1,0 +1,6 @@
+## Description
+This project is a configurable command-line data pipeline that loads a dataset, validates and cleans it, and saves the result as a CSV file. Running `pipeline.py` with input, config, and output paths will perform the following: (1) Confirm that the input and configuration files exist, (2) Load both files, and (3) Run data validation, processing, and output. All cleaning behavior is controlled by `config/config.yaml`. The `src/` package contains reusable modules: `data_loaders.py` reads CSV, JSON, and YAML files based on their extension, and `data_validator.py` checks that required columns are present and removes rows with values that cannot be converted to numbers. `data_processor.py` removes duplicate rows, drops rows or columns with missing values, and filters outliers using the IQR or z-score method, then produces a summary cleaning report. `data_output.py` creates the output directory if needed and writes the cleaned data, while `utils.py` handles logging setup and input file validation. `pipeline.py` itself coordinates all steps, handles errors by logging them and exiting with status code 1, and prints the final cleaning report.
+
+## Sample imput
+Run this code to start:
+`python pipeline.py --input fixtures/sample_data.csv --output output/clean.csv --config config/config.yaml --verbose`
