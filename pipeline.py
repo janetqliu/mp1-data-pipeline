@@ -92,6 +92,8 @@ def main():
     required_columns = config["validation"]["required_columns"]
     numeric_columns = config["validation"]["numeric_columns"]
 
+    df_before = data.copy()
+
     try:
         df = validate_dataframe(data, required_columns, numeric_columns)
     except ValueError as e:
@@ -100,7 +102,7 @@ def main():
 
     logger.info(f"Rows before validating: {len(df_before)} | Rows after: {len(df)}")
 
-    df_before = data.copy()
+    df_before2 = data.copy()
 
     try:
         df_after = process_data(df, config)
@@ -108,12 +110,12 @@ def main():
         logger.error(f"Failed to process data: {e}")
         sys.exit(1)
 
-    logger.info(f"Processing complete: {len(df_before)} -> {len(df_after)} rows")
+    logger.info(f"Processing complete: {len(df_before2)} -> {len(df_after)} rows")
 
     outpath = save_data(df_after, args.output)
     logger.info(f"Saved data successfully to {args.output}")
 
-    report = create_cleaning_report(df_before, df_after)
+    report = create_cleaning_report(df_before2, df_after)
 
     print(report)
 
