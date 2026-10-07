@@ -44,14 +44,16 @@ def load_data(filepath):
     filepath is a string, such as 'fixtures/sample.csv'"""
     
     data = Path(filepath)
-    if data.suffix == ".csv":
+    suffix = data.suffix.lower()
+
+    if suffix == ".csv":
         return load_csv(data)
-    elif data.suffix == ".json":
+    elif suffix == ".json":
         return load_json(data)
-    elif data.suffix == ".yaml" or data.suffix == ".yml":
+    elif suffix == ".yaml" or suffix == ".yml":
         return load_yaml(data)
     else:
-        logger.error(f"Unsupported file format: {data.suffix}")
+        logger.error(f"Unsupported file format: {suffix}")
         raise ValueError("Unsupported file format.")
 
 

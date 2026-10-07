@@ -1,13 +1,16 @@
 processing:
-  remove_duplicates: true
+  remove_duplicates: True
 
   missing:
-    enabled: true
+    enabled: True
     axis: "rows"
 
   outliers:
-    enabled: true
-    columns:
-      - Score
+    enabled: True
+    columns: ["rating"]
     method: "iqr"
     threshold: 1.5
+  
+validation:
+  required_columns: ["record_id","name","rating","category","status"]
+  numeric_columns: ["rating"]

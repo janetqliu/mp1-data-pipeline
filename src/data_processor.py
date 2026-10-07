@@ -68,23 +68,24 @@ def remove_outliers(df, columns, method, threshold):
 
     after = len(df)
 
-    logger.debug(f"{before - after} rows removed via {method} with {threshold} threshold")
+    logger.debug(f"{before - after} rows removed from {columns} via {method} with {threshold} threshold")
     
     return df
 
 
 def process_data(df, config):
     """Apply the processing steps enabled in the configuration."""
-    conf = config["processing"]
 
-    if conf["remove_duplicates"] == True:
+    if config["processing"]["remove_duplicates"] == True:
         df = remove_duplicates(df)
 
-    if conf["missing"]["enabled"] == True:
-        df = handle_missing(df, axis=conf["missing"]["axis"])
+    if config["processing"]["missing"]["enabled"] == True:
+        df = handle_missing(df, axis=config["processing"]["missing"]["axis"])
 
-    if conf["outliers"]["enabled"] == True:
-        df = remove_outliers(df, conf["outliers"]["columns"], conf["outliers"]["method"], conf["outliers"]["threshold"])
+    if config["processing"]["outliers"]["enabled"] == True:
+        df = remove_outliers(df, config["processing"]["outliers"]["columns"], 
+                             config["processing"]["outliers"]["method"], 
+                             config["processing"]["outliers"]["threshold"])
 
     return df
 
